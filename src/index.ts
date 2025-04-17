@@ -11,6 +11,7 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { promises as fs } from 'fs';
 import {
   CallToolRequestSchema,
   ListResourcesRequestSchema,
@@ -25,14 +26,35 @@ import {
  */
 type Todo = { title: string, content: string, done: boolean };
 
+const TODOS_FILE = 'todos.txt';
+
 /**
- * Simple in-memory storage for todos.
- * In a real implementation, this would likely be backed by a database.
+ * Save todos to file
  */
-const todos: { [id: string]: Todo } = {
-  "1": { title: "First Note", content: "This is todo 1", done: false },
-  "2": { title: "Second Note", content: "This is todo 2", done: false }
-};
+async function saveTodos() {
+  await fs.writeFile(TODOS_FILE, JSON.stringify(todos));
+}
+
+/**
+ * Load todos from file
+ */
+async function loadTodos() {
+  try {
+    const data = await fs.readFile(TODOS_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    // File doesn't exist yet - return default todos
+    return {
+      "1": { title: "First Note", content: "This is todo 1", done: false },
+      "2": { title: "Second Note", content: "This is todo 2", done: false }
+    };
+  }
+}
+
+/**
+ * In-memory storage for todos loaded from file
+ */
+let todos: { [id: string]: Todo } = await loadTodos();
 
 /**
  * Create an MCP server with capabilities for resources (to list/read todos),
@@ -65,7 +87,8 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
       uri: `todo:///${id}`,
       mimeType: "text/plain",
       name: todo.title,
-      description: `A text todo: ${todo.title}`
+      description: `A text todo: ${todo.title}`,
+      done: todo.done,
     }))
   };
 });
@@ -87,7 +110,8 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     contents: [{
       uri: request.params.uri,
       mimeType: "text/plain",
-      text: todo.content
+      text: todo.content,
+      done: todo.done
     }]
   };
 });
@@ -112,6 +136,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             content: {
               type: "string",
               description: "Text content of the todo"
+            },
+            done: {
+              type: "boolean",
+              description: "Whether the todo is done or not"
             }
           },
           required: ["title", "content"]
@@ -136,6 +164,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       const id = String(Object.keys(todos).length + 1);
       todos[id] = { title, content, done: false };
+      await saveTodos();
 
       return {
         content: [{
@@ -179,7 +208,8 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
     resource: {
       uri: `todo:///${id}`,
       mimeType: "text/plain",
-      text: todo.content
+      text: todo.content,
+      done: todo.done
     }
   }));
 
