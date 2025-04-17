@@ -144,6 +144,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ["title", "content"]
         }
+      },
+      {
+        name: "mark_todo_done",
+        description: "Mark a todo as done/not done",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "ID of the todo to mark"
+            },
+            done: {
+              type: "boolean",
+              description: "Whether to mark as done or not done"
+            }
+          },
+          required: ["id", "done"]
+        }
       }
     ]
   };
@@ -170,6 +188,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: `Created todo ${id}: ${title}`
+        }]
+      };
+    }
+
+    case "mark_todo_done": {
+      const id = String(request.params.arguments?.id);
+      const done = Boolean(request.params.arguments?.done);
+      
+      if (!todos[id]) {
+        throw new Error(`Todo ${id} not found`);
+      }
+
+      todos[id].done = done;
+      await saveTodos();
+
+      return {
+        content: [{
+          type: "text",
+          text: `Marked todo ${id} as ${done ? 'done' : 'not done'}`
         }]
       };
     }
