@@ -42,12 +42,10 @@ async function loadTodos() {
   try {
     const data = await fs.readFile(TODOS_FILE, 'utf-8');
     return JSON.parse(data);
-  } catch (err) {
-    // File doesn't exist yet - return default todos
-    return {
-      "1": { title: "First Note", content: "This is todo 1", done: false },
-      "2": { title: "Second Note", content: "This is todo 2", done: false }
-    };
+  } catch (error) {
+    // File doesn't exist yet - return empty object
+      fs.writeFile(TODOS_FILE, JSON.stringify({}));
+      return {};
   }
 }
 
@@ -162,6 +160,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
           required: ["id", "done"]
         }
+      },
+      {
+        name: "get_all_todos",
+        description: "Get all todos with their details",
+        inputSchema: {
+          type: "object",
+          properties: {}
+        }
       }
     ]
   };
@@ -207,6 +213,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: `Marked todo ${id} as ${done ? 'done' : 'not done'}`
+        }]
+      };
+    }
+
+    case "get_all_todos": {
+      let result = "";
+      Object.entries(todos).map(([id, todo]) => (
+        result += `${id}: ${todo.title} - ${todo.done ? 'Done' : 'Not Done'}\n`
+      ));
+      
+      return {
+        content: [{
+          type: "text",
+          text: result ? result : "No todos available"
         }]
       };
     }
