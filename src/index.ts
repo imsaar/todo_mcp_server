@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * This is a template MCP server that implements a simple todos system.
+ * Thisis MCP server that implements a simple todos system.
  * It demonstrates core MCP concepts like resources and tools by allowing:
  * - Listing todos as resources
  * - Reading individual todos
@@ -26,7 +26,7 @@ import {
  */
 type Todo = { title: string, content: string, done: boolean };
 
-const TODOS_FILE = 'todos.txt';
+const TODOS_FILE = '/Users/arizvi/Desktop/todos.txt';
 
 /**
  * Save todos to file
@@ -62,7 +62,7 @@ let todos: { [id: string]: Todo } = await loadTodos();
  */
 const server = new Server(
   {
-    name: "saar-todo",
+    name: "todos",
     version: "0.1.0",
   },
   {
