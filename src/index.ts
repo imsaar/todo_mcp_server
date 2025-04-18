@@ -254,12 +254,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       delete todos[id];
+      
+      // Reindex todos to have sequential IDs starting from 1
+      const todoEntries = Object.entries(todos);
+      const newTodos: { [id: string]: Todo } = {};
+      todoEntries.forEach(([_, todo], index) => {
+        newTodos[(index + 1).toString()] = todo;
+      });
+      todos = newTodos;
+      
       await saveTodos();
 
       return {
         content: [{
           type: "text",
-          text: `Deleted todo ${id}`
+          text: `Deleted todo ${id} and reindexed remaining todos`
         }]
       };
     }
