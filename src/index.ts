@@ -168,6 +168,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           type: "object",
           properties: {}
         }
+      },
+      {
+        name: "delete_todo",
+        description: "Delete a todo by ID",
+        inputSchema: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "ID of the todo to delete"
+            }
+          },
+          required: ["id"]
+        }
       }
     ]
   };
@@ -227,6 +241,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [{
           type: "text",
           text: result ? result : "No todos available"
+        }]
+      };
+    }
+
+    case "delete_todo": {
+      const id = String(request.params.arguments?.id);
+      
+      if (!todos[id]) {
+        throw new Error(`Todo ${id} not found`);
+      }
+
+      delete todos[id];
+      await saveTodos();
+
+      return {
+        content: [{
+          type: "text",
+          text: `Deleted todo ${id}`
         }]
       };
     }
