@@ -1,70 +1,90 @@
-# saar-todo MCP Server
+# Todo MCP Server
 
-A simple MCP server to maintain my ToDo via LLMs
-
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
-
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+A simple todo model context protocol (MCP) server built with TypeScript SDK.
 
 ## Features
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+- Add and delete todo items
+- Mark todos as complete
+- Get all todos
 
-### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
+## Installation
 
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
-
-## Development
-
-Install dependencies:
+1. Clone the repository
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-Build the server:
+## Development
+
+Run the development server:
+```bash
+npm run dev
+```
+
+Build for production:
 ```bash
 npm run build
 ```
 
-For development with auto-rebuild:
+## Testing with mcp-inspector
+
+1. Install mcp-inspector (if not already installed):
 ```bash
-npm run watch
+npm install -g @modelcontext/mcp-inspector
 ```
 
-## Installation
+2. Build your MCP server:
+```bash
+npm run build
+```
 
-To use with Claude Desktop, add the server config:
+3. In a new terminal, inspect the server:
+```bash
+mcp-inspector node /path/to/repo/build/index.js
+```
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+## Local MCP Server Installation
 
+To use this MCP server in other local projects:
+
+1. Build the server:
+```bash
+npm run build
+```
+
+2. Link the package locally:
+```bash
+npm link
+```
+
+3. Configure your project's mcp.config.json:
 ```json
 {
   "mcpServers": {
-    "saar-todo": {
-      "command": "/path/to/saar-todo/build/index.js"
+    // ...
+    "todo": {
+      "command": "node",
+      "args": [
+        "/path/to/repo/build/index.js"
+      ]
     }
   }
 }
 ```
 
-### Debugging
+## Project Structure
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+- `src/` - Contains all source files
+  - `index.ts` - Main application entry point
+- `build/` - Contains compiled output (created during build)
+- `package.json` - Project configuration and dependencies
+- `tsconfig.json` - TypeScript configuration
 
-```bash
-npm run inspector
-```
+## Available Scripts
 
-The Inspector will provide a URL to access debugging tools in your browser.
+- `dev` - Start development server
+- `build` - Build production version
+- `watch` - Watch for changes and rebuild
+- `clean` - Remove build artifacts
