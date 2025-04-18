@@ -12,6 +12,9 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { promises as fs } from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import {
   CallToolRequestSchema,
   ListResourcesRequestSchema,
@@ -26,7 +29,7 @@ import {
  */
 type Todo = { title: string, content: string, done: boolean };
 
-const TODOS_FILE = '/Users/arizvi/Desktop/todos.txt';
+const TODOS_FILE = path.join(os.homedir(),'todos.txt');
 
 /**
  * Save todos to file
@@ -201,7 +204,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       var id_list = Object.keys(todos)
-      const id = String(1 + Number(id_list[id_list.length-1])); 
+      
+      const id = (id_list.length === 0 ? "1" : String(Number(id_list[id_list.length-1]) + 1)); 
       todos[id] = { title, content, done: false };
       await saveTodos();
 
