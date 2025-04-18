@@ -200,7 +200,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         throw new Error("Title and content are required");
       }
 
-      const id = String(Object.keys(todos).length + 1);
+      var id_list = Object.keys(todos)
+      const id = String(1 + Number(id_list[id_list.length-1])); 
       todos[id] = { title, content, done: false };
       await saveTodos();
 
